@@ -32,12 +32,12 @@ class UserRegistrationForm(UserCreationForm):
             "street_address",
         ]
 
-        # form.save()
-
     def save(self, commit=True):
-        our_user = super().save(commit=False)  # ami database e data save korbo na ekhn
-        if commit == True:
-            our_user.save()  # user model e data save korlam
+        our_user = super().save(commit=False)
+
+        if commit:
+            our_user.save()
+
             account_type = self.cleaned_data.get("account_type")
             gender = self.cleaned_data.get("gender")
             postal_code = self.cleaned_data.get("postal_code")
@@ -53,6 +53,7 @@ class UserRegistrationForm(UserCreationForm):
                 city=city,
                 street_address=street_address,
             )
+
             UserBankAccount.objects.create(
                 user=our_user,
                 account_type=account_type,
@@ -60,6 +61,7 @@ class UserRegistrationForm(UserCreationForm):
                 birth_date=birth_date,
                 account_no=100000 + our_user.id,
             )
+
         return our_user
 
     def __init__(self, *args, **kwargs):
@@ -78,9 +80,6 @@ class UserRegistrationForm(UserCreationForm):
             )
 
 
-# profile ki ki jinis update korte parbe amader user
-
-
 class UserUpdateForm(forms.ModelForm):
     birth_date = forms.DateField(widget=forms.DateInput(attrs={"type": "date"}))
     gender = forms.ChoiceField(choices=GENDER_TYPE)
@@ -96,6 +95,7 @@ class UserUpdateForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
         for field in self.fields:
             self.fields[field].widget.attrs.update(
                 {
@@ -107,7 +107,7 @@ class UserUpdateForm(forms.ModelForm):
                     )
                 }
             )
-        # jodi user er account thake
+
         if self.instance:
             try:
                 user_account = self.instance.account
@@ -127,12 +127,11 @@ class UserUpdateForm(forms.ModelForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
+
         if commit:
             user.save()
 
-            user_account, created = UserBankAccount.objects.get_or_create(
-                user=user
-            )  # jodi account thake taile seta jabe user_account ar jodi account na thake taile create hobe ar seta created er moddhe jabe
+            user_account, created = UserBankAccount.objects.get_or_create(user=user)
             user_address, created = UserAddress.objects.get_or_create(user=user)
 
             user_account.account_type = self.cleaned_data["account_type"]

@@ -1,15 +1,15 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.generic import FormView
-from .forms import UserRegistrationForm, UserUpdateForm
 from django.contrib.auth import login, logout
 from django.urls import reverse_lazy
 from django.contrib.auth.views import LoginView
 from django.views import View
-from django.shortcuts import redirect
+
+from .forms import UserRegistrationForm, UserUpdateForm
 
 
 class UserRegistrationView(FormView):
-    template_name = "accounts/user_registration.html"
+    template_name = "accounts/register.html"
     form_class = UserRegistrationForm
     success_url = reverse_lazy("profile")
 
@@ -22,7 +22,7 @@ class UserRegistrationView(FormView):
 
 
 class UserLoginView(LoginView):
-    template_name = "accounts/user_login.html"
+    template_name = "accounts/login.html"
 
     def get_success_url(self):
         return reverse_lazy("home")
@@ -42,7 +42,9 @@ class UserBankAccountUpdateView(View):
 
     def post(self, request):
         form = UserUpdateForm(request.POST, instance=request.user)
+
         if form.is_valid():
             form.save()
             return redirect("profile")
+
         return render(request, self.template_name, {"form": form})
